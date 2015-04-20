@@ -46,6 +46,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Point;
 import android.hardware.Camera;
 import android.hardware.Camera.CameraInfo;
 import android.net.Uri;
@@ -175,6 +176,8 @@ public class PicatsizeModule extends KrollModule
 		KrollFunction errorCallback = null;
 		boolean saveToPhotoGallery = false;
 		
+		Log.d(TAG, "launchNativeCamera");
+		
 		if (cameraOptions.containsKeyAndNotNull(TiC.PROPERTY_SUCCESS)) {
 			successCallback = (KrollFunction) cameraOptions.get(TiC.PROPERTY_SUCCESS);
 		}
@@ -284,7 +287,6 @@ public class PicatsizeModule extends KrollModule
 			Log.i(TAG, "Setting height and width, height = " + String.valueOf(cameraOptions.getInt("targetHeight")));
 			PASCameraActivity.targetPictureHeight = cameraOptions.getInt("targetHeight");
 			PASCameraActivity.targetPictureWidth = cameraOptions.getInt("targetWidth");
-			//PASCameraActivity.setTargetSizes(cameraOptions.getInt("targetHeight"), cameraOptions.getInt("targetWidth"));
 		}
 		
 		PASCameraActivity.callbackContext = getKrollObject();
@@ -523,6 +525,7 @@ public class PicatsizeModule extends KrollModule
 		protected Intent cameraIntent;
 		protected int lastImageId;
 		private boolean validFileCreated;
+		protected Point desiredTargetSize;
 
 		//Validates if the file is a valid bitmap
 		private void validateFile() throws Throwable

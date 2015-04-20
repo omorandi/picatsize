@@ -74,8 +74,8 @@ public class PASCameraActivity extends TiBaseActivity implements SurfaceHolder.C
 	public static boolean autohide = true;
 	public List<Size> supportedPictureSizes;
 	public Size desiredPictureSize;
-	public static int targetPictureHeight;
-	public static int targetPictureWidth;
+	public static int targetPictureHeight = 0;
+	public static int targetPictureWidth = 0;
 
 	private static class PreviewLayout extends FrameLayout
 	{
@@ -256,6 +256,8 @@ public class PASCameraActivity extends TiBaseActivity implements SurfaceHolder.C
 			}
 		}
 	}
+	
+
 
 	@Override
 	protected void onPause(){
@@ -355,15 +357,11 @@ public class PASCameraActivity extends TiBaseActivity implements SurfaceHolder.C
 				param.setPictureSize(pictureSize.width, pictureSize.height);
 			}
 		}
-		if (this.targetPictureHeight != 0 && this.targetPictureWidth != 0) {
-			Log.i(TAG, "target height/width exist");
-			Camera.Size targetDesiredSize = setDesiredPictureSize(param, this.targetPictureWidth, this.targetPictureHeight);
-			if(targetDesiredSize != null) {
-				Log.i(TAG, "setting desired height/width");
-				param.setPictureSize(targetDesiredSize.width, targetDesiredSize.height);
-			}
-		}
+		
 		camera.setParameters(param);
+		if (targetPictureWidth != 0 && targetPictureHeight != 0) {
+			setDesiredPictureSize(param, targetPictureWidth, targetPictureHeight);
+		}
 
 		try {
 			camera.setPreviewDisplay(previewHolder);
@@ -533,15 +531,18 @@ public class PASCameraActivity extends TiBaseActivity implements SurfaceHolder.C
 	 * @param height
 	 *            (int) desired height of the image
 	 */
-	static public Camera.Size setDesiredPictureSize(Parameters param, int width, int height)
+	public void setDesiredPictureSize(Parameters param, int width, int height)
 	{
 		Log.i(TAG, "setDesiredPictureSize(" + String.valueOf(width) + ", " + String.valueOf(height) + ")");
+		if (camera == null) {
+			return;
+		}
 		try {
 			List<Camera.Size> pictSizes = param.getSupportedPictureSizes();
 			Log.i(TAG, "got sizes");
 			if(pictSizes == null || pictSizes.size() == 0) {
 				Log.i(TAG, "no sizes or pictSizes is null or something");
-				return null;
+				return;
 			}
 
 			// sort sizes in ascending order
@@ -566,10 +567,13 @@ public class PASCameraActivity extends TiBaseActivity implements SurfaceHolder.C
 				theClosestSupportedSize = pictSizes.get(pictSizes.size() - 1);
 			}
 			Log.i(TAG, "about to return sizes");
-			return theClosestSupportedSize;
+			
+			param.setPictureSize(theClosestSupportedSize.width, theClosestSupportedSize.height);
+			camera.setParameters(param);
+			
 		} catch (Throwable t) {
 			Log.e(TAG, "Could not set picture size", t);
-			return null;
+			return;
 		}
 	}
 
